@@ -2,35 +2,37 @@
 // 🏛 STG GOVERNMENT - SOVEREIGN DIGITAL PROPERTY LICENSE
 // 🛡 ARCHITECT: ANDI MUHAMMAD HARPIANTO | ID: 19546
 // ⚠ WARNING: JANGAN AJARI IKAN BERENANG!
-/*
-  1. NO CLONE/COPY: Seluruh kode ini adalah karya orisinal Baremetal STG.
-  2. MANDATORY REPORT: Penggunaan fragmen kode wajib lapor ke Dashboard STG.
-  3. NO RECOMMENDATION: Kami TIDAK menyarankan Anda menggunakan properti ini.
-  4. FULL LIABILITY: Segala kerusakan sistem Anda akibat nekat menggunakan 
-     Intelektual Digital STG adalah TANGGUNG JAWAB ANDA SENDIRI.
-  5. VETO POWER: Arsitek berhak mematikan fungsi kode secara Metaportasi.
-  "Kami Berdaulat, Kami Menentukan Aturan Kami Sendiri."
-*/
 
 pragma solidity ^0.8.20;
 
 contract SovereignAssetBacking {
+    // Identitas Aset
     string public name = "Act-Ark Sovereign Credit";
     string public symbol = "ASSET-ARK";
     uint8 public decimals = 18;
 
-    // Valuasi masif sesuai spesifikasi Anda
+    // Valuasi masif: 1 Sektiliun unit koin utuh
     uint256 public constant TOTAL_VALUATION = 1_000_000 * 10**15 * 10**18;
     uint256 public totalSupply;
+    
     address public sovereignGovernment;
+    bool public isVetoed = false; // Status Kedaulatan
 
     mapping(address => uint256) public balances;
     
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Minted(address indexed to, uint256 amount);
+    event SovereignVetoTriggered(address indexed architect, string reason);
 
+    // Modifier: Memastikan hanya Pemerintah Berdaulat yang bisa akses
     modifier onlySovereign() {
         require(msg.sender == sovereignGovernment, "Access Denied: Not Sovereign Government");
+        _;
+    }
+
+    // Modifier: Memastikan sistem tidak sedang dalam status Veto
+    modifier activeSovereignty() {
+        require(!isVetoed, "Sovereign Power: System has been Vetoed/Disabled");
         _;
     }
 
@@ -39,11 +41,19 @@ contract SovereignAssetBacking {
     }
 
     /**
-     * @dev Menambah jumlah koin (Minting) ke alamat tertentu.
-     * Hanya bisa dipanggil oleh Sovereign Government.
-     * Jumlah yang dicetak tidak boleh melebihi TOTAL_VALUATION.
+     * @dev VETO POWER (METAPORTASI)
+     * Poin 5 Lisensi: Arsitek berhak mematikan fungsi kode secara permanen.
      */
-    function mint(address to, uint256 amount) public onlySovereign {
+    function triggerSovereignVeto(string memory reason) public onlySovereign {
+        isVetoed = true;
+        emit SovereignVetoTriggered(msg.sender, reason);
+    }
+
+    /**
+     * @dev Menambah jumlah koin (Minting).
+     * Terikat pada batas TOTAL_VALUATION dan status Kedaulatan Aktif.
+     */
+    function mint(address to, uint256 amount) public onlySovereign activeSovereignty {
         require(to != address(0), "Cannot mint to zero address");
         require(totalSupply + amount <= TOTAL_VALUATION, "Exceeds Total Sovereign Valuation");
 
@@ -52,6 +62,20 @@ contract SovereignAssetBacking {
 
         emit Minted(to, amount);
         emit Transfer(address(0), to, amount);
+    }
+
+    /**
+     * @dev Fungsi Transfer Dasar.
+     * Tidak akan berfungsi jika Veto telah diaktifkan.
+     */
+    function transfer(address to, uint256 amount) public activeSovereignty returns (bool) {
+        require(balances[msg.sender] >= amount, "Insufficient Sovereign Balance");
+        
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+        
+        emit Transfer(msg.sender, to, amount);
+        return true;
     }
 
     function balanceOf(address account) public view returns (uint256) {
