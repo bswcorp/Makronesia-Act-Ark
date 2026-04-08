@@ -32,6 +32,6 @@ Repositori ini mengintegrasikan seluruh perkara tata kelola dalam satu ekosistem
 ---
 
 ### 🛡️ Legal & Sovereign Rights
-*   **License**: GPL-3.0
+*   **License**: STG
 *   **User**: bswcorp
 
