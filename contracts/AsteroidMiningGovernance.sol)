@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract AsteroidMiningGovernance {
+    struct AsteroidTarget {
+        string coordinates;
+        uint256 estimatedHe3MassGrams;
+        bool isValidated;
+        uint256 votesReceived;
+    }
+
+    mapping(uint256 => AsteroidTarget) public targetRegistry;
+    uint256 public targetCount;
+    address public sovereignGovernment; // STG dengan Hak Veto Absolut
+    uint256 public totalHe3InventoryGrams;
+
+    modifier onlySTG() {
+        require(msg.sender == sovereignGovernment, "Only STG Authority");
+        _;
+    }
+
+    constructor() {
+        sovereignGovernment = msg.sender;
+    }
+
+    // Fungsi Pengajuan Koordinat Asteroid oleh Kuorum $QSTATE
+    function proposeTarget(string memory _coords, uint256 _estimatedHe3) external {
+        targetCount++;
+        targetRegistry[targetCount] = AsteroidTarget(_coords, _estimatedHe3, false, 0);
+    }
+
+    // Eksekusi Pengerukan Drone setelah lolos verifikasi tanpa Veto dari STG
+    function executeMiningMission(uint256 _targetId, bool _stgVetoActive) external onlySTG {
+        require(!_stgVetoActive, "Mission Vetoed by Sovereign Government!");
+        AsteroidTarget storage target = targetRegistry[_targetId];
+        target.isValidated = true;
+        
+        // Asumsi misi sukses: Tambahkan ekstraksi He-3 ke inventory pusat Bahtera
+        totalHe3InventoryGrams += target.estimatedHe3MassGrams;
+    }
+}
