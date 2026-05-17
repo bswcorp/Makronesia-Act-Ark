@@ -18,3 +18,32 @@ function activateDeflectorShields() {
     // Logika mekanis membalikkan arah energi mesin 180 derajat ke perisai atas
 }
 
+// ecology/BiosphereAutomation.js
+
+const BIOSPHERE_CONFIG = {
+    // Kapasitas Dasar Entitas Hidup
+    TARGET_POPULATION: 1000,              // Jumlah Jiwa (Manusia)
+    
+    // Parameter Oksigen & Atmosfer (Fotobioreaktor Alga)
+    DAILY_O2_REQUIRED_KG: 840.0,          // Kebutuhan O2 total/hari
+    ALGAE_VOLUME_LITERS: 700000.0,        // Volume kultur Chlorella untuk konversi CO2
+    CRITICAL_O2_LEVEL_PERCENT: 19.5,      // Ambang batas bahaya oksigen menipis
+    
+    // Parameter Pangan & Pertanian Vertikal
+    TOTAL_HYDROPONIC_AREA_SQM: 20000.0,   // Luas total area tanam efektif
+    VERTICAL_STACK_LAYERS: 5,             // Jumlah rak vertikal hemat ruang
+    PHYSICAL_FLOOR_AREA_SQM: 4000.0,      // Luas lantai fisik yang dibutuhkan Bahtera
+    
+    // Parameter Hidrologi (Daur Ulang Air 98% Efisiensi)
+    WATER_LOOP_EFFICIENCY: 0.98,          // Koefisien efisiensi filtrasi ulang
+    DAILY_WATER_LOSS_KG: 550.0,           // Air yang hilang akibat kebocoran sistem/hari
+    EMERGENCY_WATER_RESERVE_LITERS: 16500 // Cadangan air aman untuk 30 hari krisis
+};
+
+// Fungsi otomatisasi penyeimbang ekosistem saat badai matahari terjadi
+function balanceAtmosphere(currentO2Percent) {
+    if (currentO2Percent < BIOSPHERE_CONFIG.CRITICAL_O2_LEVEL_PERCENT) {
+        console.log("ALERT: O2 level low! Increasing LED spectrum in Photobioreactor to boost Algae photosynthesis.");
+        // Mekanisme brutal: Alihkan energi non-esensial untuk mendongkrak fotosintesis alga
+    }
+}
