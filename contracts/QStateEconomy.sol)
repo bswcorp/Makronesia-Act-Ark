@@ -1,0 +1,57 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.26;
+
+contract QStateEconomy {
+    string public name = "QSTATE Resource Token";
+    string public symbol = "QSTATE";
+    uint8 public decimals = 18;
+    uint256 public totalSupply = 100_000_000_000_000 * 10**18; // 100 Kuadriliun
+
+    mapping(address => uint256) public balanceOf;
+    mapping(address => uint256) public resourceCredits; // Hak klaim O2/Air harian
+    address public sovereignGovernment; // STG Command
+
+    uint256 public burnTaxRatePercent = 2; // Pajak transaksi 2% untuk dibakar (Anti-Inflasi)
+    bool public crisisModeActive = false;
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event EconomyStabilized(string policyAction, uint256 newTaxRate);
+
+    modifier onlySTG() {
+        require(msg.sender == sovereignGovernment, "Unauthorized STG Authority");
+        _;
+    }
+
+    constructor() {
+        sovereignGovernment = msg.sender;
+        balanceOf[msg.sender] = totalSupply;
+    }
+
+    // Transaksi logistik harian antar warga dengan pajak pembakaran otomatis
+    function transferLogistics(address _to, uint256 _value) external returns (bool success) {
+        require(balanceOf[msg.sender] >= _value, "Insufficient $QSTATE balance");
+        
+        uint256 burnAmount = (_value * burnTaxRatePercent) / 100;
+        uint256 netAmount = _value - burnAmount;
+
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += netAmount;
+        totalSupply -= burnAmount; // Token dibakar selamanya dari sirkulasi
+
+        emit Transfer(msg.sender, _to, netAmount);
+        emit Transfer(msg.sender, address(0), burnAmount);
+        return true;
+    }
+
+    // Kebijakan moneter otomatis terikat dengan modul ecology/BiosphereAutomation.js
+    function triggerResourceCrisisPolicy(bool _status) external onlySTG {
+        crisisModeActive = _status;
+        if (crisisModeActive) {
+            burnTaxRatePercent = 15; // Naikkan pajak jadi 15% saat krisis agar warga hemat belanja
+            emit EconomyStabilized("CRISIS_TAX_INFLATION_CONTROL", burnTaxRatePercent);
+        } else {
+            burnTaxRatePercent = 2;
+            emit EconomyStabilized("NORMAL_MARKET_RESTORED", burnTaxRatePercent);
+        }
+    }
+}
